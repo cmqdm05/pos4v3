@@ -68,6 +68,8 @@ const authSlice = createSlice({
       state.user = null;
       state.staff = null;
       localStorage.clear();
+      
+      // Reset all RTK Query cache
       api.util.resetApiState();
     },
   },

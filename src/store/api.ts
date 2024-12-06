@@ -25,6 +25,7 @@ export const api = createApi({
     "Staff",
     "Notifications"
   ],
+  keepUnusedDataFor: 0, // Immediately remove unused data
 });
 
 // Add middleware to handle unauthorized responses

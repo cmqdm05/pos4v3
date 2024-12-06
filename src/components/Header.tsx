@@ -15,9 +15,11 @@ const Header = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { data: notifications } = useGetNotificationsQuery();
-  const unreadCount = notifications?.filter(n => !n.read).length || 0;
-
+  const { data: notifications = [] } = useGetNotificationsQuery(undefined, {
+    skip: !user && !staff,
+  });
+  
+  const unreadCount = notifications.filter(n => !n.read).length;
   const displayName = user?.name || staff?.name || '';
 
   const handleLogout = () => {

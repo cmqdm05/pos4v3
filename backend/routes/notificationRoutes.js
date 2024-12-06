@@ -7,9 +7,10 @@ const router = express.Router();
 // Get notifications for the current user
 router.get('/', protect, async (req, res) => {
   try {
-    const query = req.user.store 
-      ? { staff: req.user._id }
-      : { user: req.user._id };
+    const query = {
+      recipient: req.user._id,
+      recipientModel: req.user.store ? 'Staff' : 'User'
+    };
 
     const notifications = await Notification.find(query)
       .sort('-createdAt')
@@ -24,7 +25,11 @@ router.get('/', protect, async (req, res) => {
 // Mark notification as read
 router.put('/:id/read', protect, async (req, res) => {
   try {
-    const notification = await Notification.findById(req.params.id);
+    const notification = await Notification.findOne({
+      _id: req.params.id,
+      recipient: req.user._id,
+      recipientModel: req.user.store ? 'Staff' : 'User'
+    });
     
     if (!notification) {
       return res.status(404).json({ message: 'Notification not found' });
@@ -39,17 +44,37 @@ router.put('/:id/read', protect, async (req, res) => {
   }
 });
 
+// Delete notification
+router.delete('/:id', protect, async (req, res) => {
+  try {
+    const notification = await Notification.findOne({
+      _id: req.params.id,
+      recipient: req.user._id,
+      recipientModel: req.user.store ? 'Staff' : 'User'
+    });
+    
+    if (!notification) {
+      return res.status(404).json({ message: 'Notification not found' });
+    }
+
+    await notification.deleteOne();
+    res.json({ message: 'Notification deleted' });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
 // Create system notification
 router.post('/system', protect, async (req, res) => {
   try {
-    const { message, type = 'system', store } = req.body;
+    const { message, type = 'system', store, recipientId, recipientModel } = req.body;
     
     const notification = await Notification.create({
       message,
       type,
       store,
-      user: req.user.store ? null : req.user._id,
-      staff: req.user.store ? req.user._id : null
+      recipient: recipientId || req.user._id,
+      recipientModel: recipientModel || (req.user.store ? 'Staff' : 'User')
     });
 
     res.status(201).json(notification);

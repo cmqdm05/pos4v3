@@ -4,7 +4,9 @@ export const createNotification = async (
   dispatch: any,
   message: string,
   type: 'system' | 'alert' | 'info' = 'system',
-  store?: string
+  store?: string,
+  recipientId?: string,
+  recipientModel?: 'User' | 'Staff'
 ) => {
   try {
     await dispatch(
@@ -12,6 +14,8 @@ export const createNotification = async (
         message,
         type,
         store,
+        recipientId,
+        recipientModel
       })
     ).unwrap();
   } catch (error) {
